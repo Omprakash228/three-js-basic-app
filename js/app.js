@@ -18,17 +18,25 @@ function init() {
   camera.position.set(0, 0, 10);
 
   const geometry = new THREE.BoxBufferGeometry(2, 2, 2);
-  const material = new THREE.MeshStandardMaterial({ color: 0x800080 });
+  const textureLoader = new THREE.TextureLoader();
+  const texture = textureLoader.load('textures/uv_test_bw.png');
+  texture.encoding = THREE.sRGBEncoding;
+  texture.anisotropy = 16;
+  const material = new THREE.MeshStandardMaterial({ 
+      map: texture
+    });
   mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
 
-  const light = new THREE.DirectionalLight(0xffffff, 5.0);
+  const light = new THREE.DirectionalLight(0xffffff, 3);
   light.position.set(10, 10, 10);
   scene.add(light);
 
   renderer = new THREE.WebGLRenderer({antialias: true});
   renderer.setSize(container.clientWidth, container.clientHeight);
   renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.gammaFactor = 2.2;
+  renderer.gammaOutput = true;
 
   container.appendChild(renderer.domElement);
 
