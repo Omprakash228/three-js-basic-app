@@ -4,6 +4,9 @@ let camera;
 let mesh;
 let renderer;
 
+const mixers = [];
+const clock = new THREE.Clock();
+
 function init() {
     container = document.querySelector("#scene-container");
 
@@ -13,7 +16,8 @@ function init() {
     createCamera();
     createControls();
     createLights();
-    createMeshes();
+    // createMeshes();
+    loadModels();
     createRenderer();
 
     renderer.setAnimationLoop(() => {
@@ -25,10 +29,10 @@ function init() {
 function createCamera() {
     const fov = 35;
     const aspect = container.clientWidth / container.clientHeight;
-    const near = 0.1;
+    const near = 1;
     const far = 100;
     camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    camera.position.set(-5, 5, 7);
+    camera.position.set(-1.5, 1.5, 6.5);
 }
 
 function createControls() {
@@ -46,6 +50,41 @@ function createLights() {
     mainLight.position.set(10, 10, 10);
 
     scene.add(ambientLight, mainLight);
+}
+
+function loadModels() {
+    const loader = new THREE.GLTFLoader();
+
+    const onLoad = (gltf, position) => {
+        const model = gltf.scene.children[0];
+        model.position.copy(position);
+        model.scale.set(0.02, 0.02, 0.02);
+
+        const animation = gltf.animations[0];
+
+        const mixer = new THREE.AnimationMixer(model);
+        mixers.push(mixer);
+
+        const action = mixer.clipAction(animation);
+        action.play();
+
+        scene.add(model);
+    }
+
+    const onProgress = () => {};
+
+    const onError = (errorMessage) => {
+        console.log(errorMessage);
+    };
+
+    const parrotPosition = new THREE.Vector3(0, 0, 2.5);
+    loader.load("models/Parrot.glb", gltf => onLoad(gltf, parrotPosition), onProgress, onError);
+
+    const flamingoPosition = new THREE.Vector3( 7.5, 0, -10);
+    loader.load("models/Flamingo.glb", gltf => onLoad(gltf, flamingoPosition), onProgress, onError);
+
+    const storkPosition = new THREE.Vector3( 0, -2.5, -10);
+    loader.load("models/Stork.glb", gltf => onLoad(gltf, storkPosition), onProgress, onError);
 }
 
 function createMaterials() {
@@ -75,7 +114,7 @@ function createGeometries() {
     const chimney = new THREE.CylinderBufferGeometry(0.3, 0.1, 0.5);
 
     const wheel = new THREE.CylinderBufferGeometry(0.4, 0.4, 1.75, 16);
-    wheel.rotateX(Math.PI/2);
+    wheel.rotateX(Math.PI / 2);
 
     return {
         nose,
@@ -116,12 +155,12 @@ function createMeshes() {
     bigWheel.position.set(1.5, -0.1, 0);
 
     train.add(
-        nose, 
-        cabin, 
-        chimney, 
-        smallWheelRear, 
-        smallWheelCenter, 
-        smallWheelFront, 
+        nose,
+        cabin,
+        chimney,
+        smallWheelRear,
+        smallWheelCenter,
+        smallWheelFront,
         bigWheel
     );
 }
@@ -140,7 +179,10 @@ function createRenderer() {
 }
 
 function update() {
-
+    const delta = clock.getDelta();
+    for(const mixer of mixers) {
+        mixer.update(delta);
+    }
 }
 
 function render() {
