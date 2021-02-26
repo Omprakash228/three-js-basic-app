@@ -58,7 +58,7 @@ function loadModels() {
     const onLoad = (gltf, position) => {
         const model = gltf.scene.children[0];
         model.position.copy(position);
-        model.scale.set(0.02, 0.02, 0.02);
+        model.scale.set(0.025, 0.025, 0.025);
 
         const animation = gltf.animations[0];
 
